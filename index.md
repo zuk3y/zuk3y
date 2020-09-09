@@ -34,9 +34,9 @@ The information on this website is for educational purposes only. The author of 
 
 i use kali linux by offensive security. you can either use it on a virtualization software like virtualbox/vmware or use it as a partition along with your host os.
 
-[1. installation guide for virtualization](https://phoenixnap.com/kb/how-to-install-kali-linux-on-virtualbox)
+[installation guide for virtualization](https://phoenixnap.com/kb/how-to-install-kali-linux-on-virtualbox)
 
-[2. installation guide for main os](https://techsprobe.com/how-to-install-kali-linux-2020-on-a-laptop-pc/)
+[installation guide for main os](https://techsprobe.com/how-to-install-kali-linux-2020-on-a-laptop-pc/)
 
 ## secure your kali installation
 
@@ -57,9 +57,9 @@ i use kali linux by offensive security. you can either use it on a virtualizatio
 - close unnecessary ports/services (sudo service <service name> stop)
 
 
-[1. guide to secure kali](https://alphacybersecurity.tech/how-to-secure-your-kali-linux-machine/)
+[guide to secure kali](https://alphacybersecurity.tech/how-to-secure-your-kali-linux-machine/)
 
-[2. guide to secure kali further](https://thehacktoday.com/how-to-protect-yourself-while-hacking-in-kali-linux/)
+[guide to secure kali further](https://thehacktoday.com/how-to-protect-yourself-while-hacking-in-kali-linux/)
 
 
 
