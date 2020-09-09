@@ -1,4 +1,4 @@
 ```
-a dynamic offensive security bible
+a no-bullshit offensive security bible
 
 ```
