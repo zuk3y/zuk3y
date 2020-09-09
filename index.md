@@ -513,6 +513,7 @@ while True:
 ### offset.py
 
 - /usr/share/metasploit-framework/tools/exploit/pattern-create.rb -l 5000
+
 ```
 #!/usr/bin/python
 import sys, socket
@@ -536,6 +537,7 @@ except:
 
 ### overwrite.py
 
+
 ```
 #!/usr/bin/python
 import sys, socket
@@ -558,6 +560,7 @@ except:
 ```
 
 ### badchars.py
+
 
 ```
 #!/usr/bin/python
@@ -588,6 +591,7 @@ except:
                 print "Error connecting to server"
                 sys.exit()
 ```
+
 ### module.py
 
 - use !mona jmp -r esp to find the hex value to overwrite on the EIP
@@ -674,13 +678,16 @@ except:
 
 ## compiling exploits
 
+
 - compiling windows exploits
+
 
 ```
 i686-w64-mingw32-gcc exploit.c -o exploit
 ```
 
 - for 32 bit
+
 
 ```
 i686-w64-mingw32-gcc 40564.c -o 40564 -lws2_32
