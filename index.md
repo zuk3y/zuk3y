@@ -32,11 +32,10 @@ The information on this website is for educational purposes only. The author of 
 - easier to use than mainstream opinion
 
 
-i use kali linux by offensive security. you can either use it on a virtualization software like virtualbox/vmware or use it as a partition along with your host os.
-
 [installation guide for virtualization](https://phoenixnap.com/kb/how-to-install-kali-linux-on-virtualbox)
 
 [installation guide for main os](https://techsprobe.com/how-to-install-kali-linux-2020-on-a-laptop-pc/)
+
 
 ## secure your kali installation
 
