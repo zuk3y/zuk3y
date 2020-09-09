@@ -66,7 +66,7 @@ i use kali linux by offensive security. you can either use it on a virtualizatio
 **## the methodology i follow**
 
 
-**- initial scoping**
+**initial scoping**
 
 **recon**
 
