@@ -3,6 +3,7 @@
 ### disclaimer:
 The information on this website is for educational purposes only. The author of this work will not be held accountable for any use or misuse of the information on this website. As there is always some risk involved, the author is not responsible for any effects or consequences from the use of any suggestions, recommendations, or procedures described herein. 
 
+# setting up your workstation
 
 ## dump windows 
  
@@ -63,7 +64,7 @@ i use kali linux by offensive security. you can either use it on a virtualizatio
 
 
 
-## the methodology i follow
+# the methodology i follow
 
 
 **initial scoping**
@@ -2793,7 +2794,7 @@ else
     JAWS-ENUM
     }
 ```
-## stack buffer overflow without aslr/dep/seh
+# buffer overflow
 
 - fuzzing
 - finding the offset
