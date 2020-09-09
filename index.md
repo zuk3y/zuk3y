@@ -68,17 +68,17 @@ i use kali linux by offensive security. you can either use it on a virtualizatio
 
 **- initial scoping**
 
-**- recon **
+**recon**
 
-**- enumerate -> exploit**
+**enumerate -> exploit**
 
-**- reverse shell**
+**reverse shell**
 
-**- upgrade shell**
+**upgrade shell**
 
-**- enumerate the target**
+**enumerate the target**
 
-**- escalate privileges and gain root**
+**escalate privileges and gain root**
 
 
 ## scoping
