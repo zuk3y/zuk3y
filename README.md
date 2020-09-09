@@ -1,1 +1,4 @@
-# my infosec bible
+```
+a dynamic offensive security bible
+
+```
