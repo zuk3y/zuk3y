@@ -51,8 +51,7 @@ i use kali linux by offensive security. you can either use it on a virtualizatio
 
 - install anonsurf
 
-- check open ports on your localhost (sudo ss -tulwn | grep LISTEN) 
-
+- check open ports on your localhost (sudo ss -tulwn | grep LISTEN)
 
 - close unnecessary ports/services (sudo service <service name> stop)
 
