@@ -8,15 +8,26 @@ The information on this website is for educational purposes only. The author of 
  
 
 - linux is open source, that means you have millions of lines of code at your disposal for free.
-- the applications and libraries in linux are modular and easily integrable in different projects.
+
+- modular applications and libraries in linux 
+
 - super fast boot time
-- no annoying updates at odd times
-- super fast on low ram, hence lightning fast
+
+- no annoying updates 
+
+- lightening fast on low ram
+
 - free
+
 - portable, yes even on a usb
+
 - secure
+
 - most tools are written in linux
+
 - most web servers run in linux due to its stability
+
+
 - easier to use than mainstream opinion
 
 
@@ -29,12 +40,20 @@ i use kali linux by offensive security. you can either use it on a virtualizatio
 ## secure your kali installation
 
 - change your default root password
+
 - change your default ssh keys
+
 - add an unprivileged user to work on, give it sudo rights with a password
+
 - change your mac address with macchanger
+
 - install tor and proxychains
+
 - install anonsurf
+
 - check open ports on your localhost (sudo ss -tulwn | grep LISTEN) 
+
+
 - close unnecessary ports/services (sudo service <service name> stop)
 
 
@@ -46,33 +65,45 @@ i use kali linux by offensive security. you can either use it on a virtualizatio
 
 
 - initial scoping
+
 - recon 
+
 - more recon
+
 - enumerate all attack surfaces
+
 - research the attack surfaces
+
 - search for pre-existing exploits for the services
+
 - create a personalised exploit
+
 - exploit
+
 - get a shell
+
 - get a fully upgraded shell
+
 - enumerate the target user/host
+
 - escalate privileges
+
 - gain root access
+
 - submit flag/proof of concept
+
 - write a report
+
 - chill the fuvk out
 
 
 ## scoping
 clearly understand which targets your have permission to scan/attack, do not break the law as it would hamper your reputation as a security researcher
-know which domains/subdomains/services you can attack
 
 ## recon
-this phase is the difference between hackers in real life vs hackers you see in the movies
-gathering information about the target is THE most important step of the methodology
 
-knowing more about the target lets you gather a picture/map of how the target works, the more you know, the more attack surfaces you have to test and exploit
-do not underestimate the significance of this step
+the most important step of the methodology.
+the better the recon, the larger the discovered attack surface, the higher the probability of finding a vulnerability and exploiting it.
 
 
 ### 1. masscan
@@ -88,11 +119,18 @@ this handy little tool lets you see which ports are open on the target along wit
 
 ```
 nmap -sTV -v IP 
+
+
 locate *.nse | grep <service>
+
 sudo nmap -sS -sV --script=default,vuln -p- -T5 IP
+
 nmap -p 139,445 --script=$scriptname IP
+
 nmap -p 139,445 --script=smb-vuln* IP -v
+
 nmap --script smtp-commands,smtp-enum-users,smtp-vuln-cve2010-4344,smtp-vuln-cve2011-1720,smtp-vuln-cve2011-1764 -p 25 IP
+
 nmap -p 389 --script ldap-search IP
  ``` 
 
