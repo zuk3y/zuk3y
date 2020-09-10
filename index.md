@@ -38,7 +38,6 @@ The information on this website is for educational purposes only. The author of 
 
 [installation guide for main os](https://techsprobe.com/how-to-install-kali-linux-2020-on-a-laptop-pc/)
 
-![change your ssh keys](https://raw.githubusercontent.com/zuk3y/howtohack101/gh-pages/secure-kali.jpg)
 ## secure your kali installation
 
 - change your default root password
