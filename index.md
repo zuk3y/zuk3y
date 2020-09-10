@@ -3,12 +3,7 @@
 ### disclaimer:
 The information on this website is for educational purposes only. The author of this work will not be held accountable for any use or misuse of the information on this website. As there is always some risk involved, the author is not responsible for any effects or consequences from the use of any suggestions, recommendations, or procedures described herein. 
 
-
-
 ![kali 2020.2 by offensive security](https://raw.githubusercontent.com/zuk3y/howtohack101/gh-pages/kali2020.png)
-
-
-
 
 # setting up your workstation
 
@@ -43,7 +38,7 @@ The information on this website is for educational purposes only. The author of 
 
 [installation guide for main os](https://techsprobe.com/how-to-install-kali-linux-2020-on-a-laptop-pc/)
 
-
+![change your ssh keys](https://raw.githubusercontent.com/zuk3y/howtohack101/gh-pages/secure-kali.jpg)
 ## secure your kali installation
 
 - change your default root password
