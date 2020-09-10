@@ -82,7 +82,7 @@ The information on this website is for educational purposes only. The author of 
 
 
 ## scoping
-clearly understand which targets your have permission to scan/attack, do not break the law as it would hamper your reputation as a security researcher
+clearly understand which targets you have permission to scan/attack, do not break the law as it would hamper your reputation as a security researcher
 
 ## recon
 
