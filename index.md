@@ -105,7 +105,7 @@ sudo nmap -sU -v IP
 
  ``` 
  
- ### 3. nmapAutomater
+### 3. nmapAutomater
  
 a useful script to automate the scanning process
 
