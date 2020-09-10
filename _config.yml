@@ -4,3 +4,4 @@ defaults:
       path: ""
     values:
       image: https://github.com/zuk3y/howtohack101/blob/gh-pages/desktop.jpg
+      type: posts
