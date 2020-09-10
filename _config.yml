@@ -1,2 +1,7 @@
 theme: jekyll-theme-hacker
-image: https://github.com/zuk3y/howtohack101/blob/gh-pages/red_kali.jpg
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      image: https://github.com/zuk3y/howtohack101/blob/gh-pages/red_kali.jpg
