@@ -3,5 +3,5 @@ defaults:
   - scope:
       path: ""
     values:
-      image: https://raw.githubusercontent.com/zuk3y/howtohack101/gh-pages/desktop.jpg
+      image: https://raw.githubusercontent.com/zuk3y/howtohack101/gh-pages/kali2020.png
       type: posts
