@@ -1,5 +1,6 @@
 # A no bullshit introduction to offensive security 
 
+
 ### disclaimer:
 The information on this website is for educational purposes only. The author of this work will not be held accountable for any use or misuse of the information on this website. As there is always some risk involved, the author is not responsible for any effects or consequences from the use of any suggestions, recommendations, or procedures described herein. 
 
@@ -91,7 +92,7 @@ recon wide to gather information on as many potential attack surfaces as possibl
 ### 1. masscan
 
 fast full port scanner
-```
+```bash
 masscan -i tun0 -p1-65535 --rate=1000 IP
 ```
   
@@ -99,7 +100,7 @@ masscan -i tun0 -p1-65535 --rate=1000 IP
 
 this handy little tool lets you see which ports are open on the target along with other information about the target
 
-```
+```bash
 nmap -sTV -v -p- IP
 sudo nmap -sU -v IP
 
@@ -109,7 +110,7 @@ sudo nmap -sU -v IP
  
 a useful script to automate the scanning process
 
-```
+```bash
  ./nmapAutomater.sh IP All
  ./nmapAutomater.sh IP Vulns
  ./nmapAutomater.sh IP Quick
