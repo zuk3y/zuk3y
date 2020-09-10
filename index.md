@@ -3,7 +3,7 @@
 ### disclaimer:
 The information on this website is for educational purposes only. The author of this work will not be held accountable for any use or misuse of the information on this website. As there is always some risk involved, the author is not responsible for any effects or consequences from the use of any suggestions, recommendations, or procedures described herein. 
 
-![this is the new kali 2020.2](https://raw.githubusercontent.com/zuk3y/howtohack101/gh-pages/kali2020.png)
+![kali 2020.2 by offensive security](https://raw.githubusercontent.com/zuk3y/howtohack101/gh-pages/kali2020.png)
 
 # setting up your workstation
 
